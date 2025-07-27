@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">HW-04-GymLog</string>
+    <string name="exercise">Exercise</string>
+    <string name="enter_an_exercise">Enter an Exercise</string>
+    <string name="weight">weight</string>
+    <string name="enter_a_weight">Enter a Weight</string>
+    <string name="weght">Weight</string>
+    <string name="enter_reps">Enter Reps</string>
+    <string name="reps">Reps</string>
+    <string name="log">Log!</string>
 </resources>
