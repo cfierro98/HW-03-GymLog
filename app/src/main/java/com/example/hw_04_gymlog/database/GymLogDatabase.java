@@ -1,4 +1,4 @@
-package com.example.hw_04_gymlog.Database;
+package com.example.hw_04_gymlog.database;
 
 import android.content.Context;
 
@@ -8,12 +8,13 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import com.example.hw_04_gymlog.Database.entities.GymLog;
+import com.example.hw_04_gymlog.database.entities.GymLog;
 import com.example.hw_04_gymlog.MainActivity;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@TypeConverters(LocalDataTypeConverter.class)
 @Database(entities = {GymLog.class}, version = 1, exportSchema = false)
 public abstract class GymLogDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "GymLog_database";
