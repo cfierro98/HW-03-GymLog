@@ -8,4 +8,8 @@
     <string name="enter_reps">Enter Reps</string>
     <string name="reps">Reps</string>
     <string name="log">Log!</string>
+    <string name="login_welcome">Welcome to the GymLog.\nPlease Sign In.</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login!</string>
 </resources>
