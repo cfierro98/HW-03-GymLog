@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.LiveData;
 
 import com.example.hw_04_gymlog.database.GymLogRepository;
 import com.example.hw_04_gymlog.database.entities.GymLog;
@@ -32,6 +34,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final String MAIN_ACTIVITY_USER_ID = "com.example.hw_04_gymlog.MAIN_ACTIVITY_USER_ID";
+    static final String SHARED_PREFERENCE_USERID_KEY = "com.example.hw_04_gymlog.SHARED_PREFERENCE_USERID_KEY";
+    static final String SHARED_PREFERENCE_USERID_VALUE = "com.example.hw_04_gymlog.SHARED_PREFERENCE_USERID_VALUE";
+    private static final int LOGGED_OUT = -1;
     ActivityMainBinding binding;
     private GymLogRepository repository;
     public static  final String TAG = "CIF GYMLOG";
@@ -39,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
     double mWeight = 0.0;
     int mReps = 0;
 
-    //TODO: Add login information
     int loggedInUserId = -1;
     private User user;
 
@@ -54,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem item = menu.findItem(R.id.logoutMenuItem);
         item.setVisible(true);
+        if(user == null){
+            return false;
+        }
         item.setTitle(user.getUsername());
         item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
@@ -87,7 +94,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        //TODO: Finish logout method
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(SHARED_PREFERENCE_USERID_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor sharedPrefEditor= sharedPreferences.edit();
+        sharedPrefEditor.putInt(SHARED_PREFERENCE_USERID_KEY, LOGGED_OUT);
+        sharedPrefEditor.apply();
+        getIntent().putExtra(MAIN_ACTIVITY_USER_ID, LOGGED_OUT);
         startActivity(LoginActivity.loginIntetntFactory(getApplicationContext()));
     }
 
@@ -99,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
 
         loginUser();
 
-        invalidateOptionsMenu();
 
         if(loggedInUserId == -1){
             Intent intent = LoginActivity.loginIntetntFactory(getApplicationContext());
@@ -129,10 +139,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
-        user = new User("Claudia", "password");
-        loggedInUserId = getIntent().getIntExtra(MAIN_ACTIVITY_USER_ID, -1);
+        //check shared preference for logged in user
+        SharedPreferences sharedPreferences = getApplication().getSharedPreferences(SHARED_PREFERENCE_USERID_KEY,
+                Context.MODE_PRIVATE);
+        loggedInUserId = sharedPreferences.getInt(SHARED_PREFERENCE_USERID_VALUE, LOGGED_OUT);
+        if(loggedInUserId != LOGGED_OUT){
+            return;
+        }
 
+        loggedInUserId = getIntent().getIntExtra(MAIN_ACTIVITY_USER_ID, LOGGED_OUT);
+        if(loggedInUserId == LOGGED_OUT){
+            return;
+        }
+        LiveData<User> userObserver = repository.getUserByUserId(loggedInUserId);
+        userObserver.observe(this, user -> {
+            if(user != null){
+                invalidateOptionsMenu();
+            }
+
+    });
     }
+
 
     static Intent mainActivityIntentFactory(Context context, int userId){
         Intent intent = new Intent(context, MainActivity.class);
