@@ -17,11 +17,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @TypeConverters(LocalDateTypeConverter.class)
-@Database(entities = {GymLog.class, User.class}, version = 5, exportSchema = false)
+@Database(entities = {GymLog.class, User.class}, version = 1, exportSchema = false)
 public abstract class GymLogDatabase extends RoomDatabase {
     public static final String USER_TABLE = "user_table";
     private static final String DATABASE_NAME = "GymLogDatabase";
-
     public static final String GYM_LOG_TABLE = "gymLogTable";
     private static volatile GymLogDatabase INSTANCE;
     private static final int NUMBER_OF_THREADS = 4;
@@ -30,7 +29,8 @@ public abstract class GymLogDatabase extends RoomDatabase {
         if(INSTANCE == null){
             synchronized (GymLogDatabase.class){
                 if(INSTANCE== null){
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+                    INSTANCE = Room.databaseBuilder(
+                            context.getApplicationContext(),
                             GymLogDatabase.class,
                                     DATABASE_NAME
                             )
