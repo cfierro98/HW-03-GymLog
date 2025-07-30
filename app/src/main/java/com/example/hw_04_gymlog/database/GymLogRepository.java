@@ -9,12 +9,13 @@ import com.example.hw_04_gymlog.database.entities.User;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class GymLogRepository {
-    private final GymLogDAO gymLogDAO;
+    private static GymLogDAO gymLogDAO;
     private final UserDAO userDAO;
     private ArrayList<GymLog> allLogs;
 
@@ -30,11 +31,11 @@ public class GymLogRepository {
         if(repository != null){
             return repository;
         }
-        Future<ArrayList<GymLog>> future = GymLogDatabase.databaseWriteExecutor.submit(
-                new Callable<ArrayList<GymLog>>() {
+        Future<GymLogRepository> future = GymLogDatabase.databaseWriteExecutor.submit(
+                new Callable<GymLogRepository>() {
                     @Override
-                    public ArrayList<GymLog> call() throws Exception {
-                        return (ArrayList<GymLog>) gymLogDAO.getAllRecords();
+                    public GymLogRepository call() throws Exception {
+                        return new GymLogRepository(application);
                     }
                 }
         );
@@ -83,6 +84,10 @@ public class GymLogRepository {
         return userDAO.getUserByUserId(userId);
     }
 
+    public LiveData<List<GymLog>> getAllLogsByUserIdLiveData(int loggedInUserId){
+        return gymLogDAO.getRecordsByUserIdLiveData(loggedInUserId);
+    }
+    @Deprecated
     public ArrayList<GymLog> getAllLogsByUserId(int loggedInUserId) {
         Future<ArrayList<GymLog>> future = GymLogDatabase.databaseWriteExecutor.submit(
                 new Callable<ArrayList<GymLog>>() {

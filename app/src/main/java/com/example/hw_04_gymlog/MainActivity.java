@@ -22,11 +22,17 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.hw_04_gymlog.database.GymLogDAO;
 import com.example.hw_04_gymlog.database.GymLogRepository;
 import com.example.hw_04_gymlog.database.entities.GymLog;
 import com.example.hw_04_gymlog.database.entities.User;
 import com.example.hw_04_gymlog.databinding.ActivityMainBinding;
+import com.example.hw_04_gymlog.viewHolders.GymLogAdapter;
+import com.example.hw_04_gymlog.viewHolders.GymLogViewModel;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -41,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int LOGGED_OUT = -1;
     ActivityMainBinding binding;
     private GymLogRepository repository;
+    private GymLogViewModel gymLogViewModel;
     public static  final String TAG = "CIF GYMLOG";
     String mExercise = "";
     double mWeight = 0.0;
@@ -114,8 +121,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = com.example.hw_04_gymlog.databinding.ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        gymLogViewModel = new ViewModelProvider(this).get(GymLogViewModel.class);
+
+
+        RecyclerView recylerView = binding.logDisplayRecyclerView;
+        final GymLogAdapter adapter = new GymLogAdapter(new GymLogAdapter.GymLogDiff());
+        recylerView.setAdapter(adapter);
+        recylerView.setLayoutManager(new LinearLayoutManager(this));
+
         repository = GymLogRepository.getRepository(getApplication());
         loginUser(savedInstanceState);
+
+        gymLogViewModel.getAllLogsById(loggedInUserId).observe(this, gymlogs ->{
+            adapter.submitList(gymlogs);
+        });
 
         //User is not logged in at this point, go to login screen
         if(loggedInUserId == -1){
@@ -124,24 +144,26 @@ public class MainActivity extends AppCompatActivity {
         }
         updateSharedPreference();
 
-        binding.logDisplayTextView.setMovementMethod(new ScrollingMovementMethod());
-        updateDisplay();
+        //TODO: REMOVE two lines below
+     //   binding.logDisplayTextView.setMovementMethod(new ScrollingMovementMethod());
+     //   updateDisplay();
         binding.logButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getInformationFromDisplay();
                 insertGymlogRecord();
-                updateDisplay();
+                //TODO REMOVE LINE BELOW
+      //          updateDisplay();
             }
         });
-
-        binding.exerciseInputEditText.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                updateDisplay();
-            }
-        });
-
+///*REMOVE THIS BLOCK
+//        binding.exerciseInputEditText.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View v){
+//                updateDisplay();
+//            }
+//        });
+//*/
     }
 
     private void loginUser(Bundle savedInstanceState) {
@@ -190,19 +212,17 @@ public class MainActivity extends AppCompatActivity {
         repository.insertGymLog(log);
     }
 
+    @Deprecated
     private void updateDisplay(){
         ArrayList<GymLog> allLogs = repository.getAllLogsByUserId(loggedInUserId);
         if(allLogs.isEmpty()){
-            binding.logDisplayTextView.setText("Nothing to show. Time to Hit the Gym!");
+          //  binding.logDisplayTextView.setText("Nothing to show. Time to Hit the Gym!");
         }
         StringBuilder sb = new StringBuilder();
         for(GymLog log : allLogs){
             sb.append(log);
         }
-        String currentInfo = binding.logDisplayTextView.getText().toString();
-        Log.d(TAG,"current info: "+currentInfo);
-        String newDisplay = String.format(Locale.US,"Exercise:%s%nWeight:%.2f%nReps:%d%n=-=-=%n%s", mExercise,mWeight,mReps,currentInfo);
-        binding.logDisplayTextView.setText(sb.toString());
+       // binding.logDisplayTextView.setText(sb.toString());
     }
     private void getInformationFromDisplay() {
         mExercise = binding.exerciseInputEditText.getText().toString();

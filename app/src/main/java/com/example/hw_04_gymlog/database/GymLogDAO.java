@@ -8,6 +8,7 @@ import androidx.room.Query;
 
 import com.example.hw_04_gymlog.database.entities.GymLog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -21,4 +22,6 @@ public interface GymLogDAO {
     @Query("SELECT * FROM " + GymLogDatabase.GYM_LOG_TABLE + " WHERE userId = :loggedInUserId ORDER BY date DESC")
     List<GymLog> getRecordsByUserId(int loggedInUserId);
 
+    @Query("SELECT * FROM " + GymLogDatabase.GYM_LOG_TABLE + " WHERE userId = :loggedInUserId ORDER BY date DESC")
+    LiveData<List<GymLog>> getRecordsByUserIdLiveData(int loggedInUserId);
 }
