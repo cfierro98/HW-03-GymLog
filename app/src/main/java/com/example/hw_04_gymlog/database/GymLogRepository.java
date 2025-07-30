@@ -7,6 +7,7 @@ import com.example.hw_04_gymlog.database.entities.GymLog;
 import com.example.hw_04_gymlog.MainActivity;
 import com.example.hw_04_gymlog.database.entities.User;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -29,11 +30,11 @@ public class GymLogRepository {
         if(repository != null){
             return repository;
         }
-        Future<GymLogRepository> future = GymLogDatabase.databaseWriteExecutor.submit(
-                new Callable<GymLogRepository>() {
+        Future<ArrayList<GymLog>> future = GymLogDatabase.databaseWriteExecutor.submit(
+                new Callable<ArrayList<GymLog>>() {
                     @Override
-                    public GymLogRepository call() throws Exception {
-                        return new GymLogRepository(application);
+                    public ArrayList<GymLog> call() throws Exception {
+                        return (ArrayList<GymLog>) gymLogDAO.getAllRecords();
                     }
                 }
         );
@@ -82,4 +83,21 @@ public class GymLogRepository {
         return userDAO.getUserByUserId(userId);
     }
 
-}
+    public ArrayList<GymLog> getAllLogsByUserId(int loggedInUserId) {
+        Future<ArrayList<GymLog>> future = GymLogDatabase.databaseWriteExecutor.submit(
+                new Callable<ArrayList<GymLog>>() {
+                    @Override
+                    public ArrayList<GymLog> call() throws Exception {
+                        return (ArrayList<GymLog>) gymLogDAO.getRecordsByUserId(loggedInUserId);
+                    }
+                });
+        try{
+            return future.get();
+        }catch (InterruptedException | ExecutionException e){
+            Log.d(MainActivity.TAG, "Problem getting GymLogRepository, thread error");
+        }
+        return null;
+    }
+
+    }
+
